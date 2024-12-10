@@ -1,12 +1,10 @@
+import { ElMessage } from "element-plus";
 export function parseInput(input: string): any {
-  if (input.startsWith("{") || input.startsWith("[")) {
-    try {
-      return JSON.parse(input);
-    } catch (jsonError) {
-      return parseJsObject(input);
-    }
+  try {
+    return JSON.parse(input);
+  } catch (jsonError) {
+    return parseJsObject(input);
   }
-  return parseJsObject(input);
 }
 
 export function generateTSType(data: any, rootTypeName = "RootType"): string {
@@ -38,9 +36,8 @@ export function generateTSType(data: any, rootTypeName = "RootType"): string {
     if (Object.keys(data).length === 0) return "{}";
     let properties = "";
     for (const [key, value] of Object.entries(data)) {
-      const propertyTypeName = `${typeName}${
-        key.charAt(0).toUpperCase() + key.slice(1)
-      }`;
+      const propertyTypeName = `${typeName}${key.charAt(0).toUpperCase() + key.slice(1)
+        }`;
       const propertyType = generateType(value, propertyTypeName);
       properties += `  ${key}: ${propertyType};\n`;
     }
@@ -64,32 +61,8 @@ function parseJsObject(str: string): any {
   try {
     return Function('"use strict";return (' + str + ")")();
   } catch (error) {
-    return customParseJsObject(str);
+    ElMessage.error("Invalid Value");
   }
 }
 
-function customParseJsObject(str: string): any {
-  str = str.trim().replace(/^\{|\}$/g, "");
-  const pairs = str
-    .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-    .filter((pair) => pair.trim() !== "");
 
-  return pairs.reduce((obj: Record<string, any>, pair) => {
-    const [key, ...valueParts] = pair.split(":");
-    const value = valueParts.join(":").trim();
-    const cleanKey = key.trim().replace(/^['"]|['"]$/g, "");
-    obj[cleanKey] = parseValue(value);
-    return obj;
-  }, {});
-}
-
-function parseValue(value: string): any {
-  if (value.startsWith("{") || value.startsWith("["))
-    return parseJsObject(value);
-  if (value === "true") return true;
-  if (value === "false") return false;
-  if (value === "null") return null;
-  if (value === "undefined") return undefined;
-  if (!isNaN(Number(value)) && value.trim() !== "") return Number(value);
-  return value.replace(/^['"]|['"]$/g, "");
-}

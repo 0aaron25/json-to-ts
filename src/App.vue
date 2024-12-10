@@ -20,18 +20,18 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="generateType"
-            >Generate TS Type</el-button
-          >
-          <el-button type="success" @click="copyOutput" v-if="output"
-            >Copy</el-button
-          >
+          <el-button type="primary" @click="generateType">
+            Generate TS Type
+          </el-button>
+          <el-button type="success" @click="copyOutput" v-if="output">
+            Copy
+          </el-button>
           <el-button
             type="danger"
             @click="clearAll"
-            v-if="jsonInput || interfaceName"
-            >Clear</el-button
-          >
+            v-if="jsonInput || interfaceName">
+            Clear
+          </el-button>
         </el-form-item>
       </el-form>
       <el-card v-if="output" class="output-card">
@@ -58,8 +58,11 @@ function generateType() {
       return;
     }
     const inputData = parseInput(jsonInput.value);
-    const customInterfaceName = interfaceName.value.trim() || "RootType";
-    output.value = generateTSType(inputData, customInterfaceName);
+
+    if (inputData) {
+      const customInterfaceName = interfaceName.value.trim() || "RootType";
+      output.value = generateTSType(inputData, customInterfaceName);
+    } 
   } catch (error) {
     if (error instanceof Error) {
       ElMessage.error(`Error: ${error.message}`);
